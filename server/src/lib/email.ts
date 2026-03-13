@@ -20,10 +20,12 @@ export async function sendEmail(to: string, subject: string, html: string) {
     host,
     port,
     secure: false,
+      requireTLS: true,
     auth: {
       user,
       pass,
     },
+    connectionTimeout: 10000,
   });
 
   await transporter.sendMail({
