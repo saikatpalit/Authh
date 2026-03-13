@@ -13,7 +13,7 @@ app.set("trust proxy", 1);
 // ✅ ADD CORS HERE (before routes)
 app.use(
   cors({
-    origin: "http://localhost:5173", // your frontend URL
+    origin: "https://sproject-authentication.vercel.app", // your frontend URL
     credentials: true, // VERY IMPORTANT for cookies
   })
 );
