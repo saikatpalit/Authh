@@ -3,13 +3,13 @@ import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import EmailVerify from "./pages/EmailVerify";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import Dashboard from "./pages/Dashboard";
-import AdminDashboard from "./pages/AdminDashboard";
+import Home from "./Pages/Home";
+import Login from "./Pages/Login";
+import EmailVerify from "./Pages/EmailVerify";
+import ForgotPassword from "./Pages/ForgotPassword";
+import ResetPassword from "./Pages/ResetPassword";
+import Dashboard from "./Pages/Dashboard";
+import AdminDashboard from "./Pages/AdminDashboard";
 
 import { AppContext } from "./context/AppContext";
 
