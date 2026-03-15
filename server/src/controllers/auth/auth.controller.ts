@@ -191,8 +191,8 @@ if (user.twoFactorEnabled) {
     });
   }
 
-const isValidCode = await verify({
-  token: String(twoFactorCode),   // ← force string, never a number
+const isValidCode = verify({
+  token: String(twoFactorCode),
   secret: user.twoFactorSecret,
 });
 
@@ -213,23 +213,24 @@ const isValidCode = await verify({
 
     const isProd = process.env.NODE_ENV === "production";
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: "none",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+res.cookie("refreshToken", refreshToken, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
 
     return res.status(200).json({
       message: "Login successfully done",
       accessToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        isEmailVerified: user.isEmailVerified,
-        twoFactorEnabled: user.twoFactorEnabled,
-      },
+user: {
+  id: user.id,
+  email: user.email,
+  name: user.name,
+  role: user.role,
+  isEmailVerified: user.isEmailVerified,
+  twoFactorEnabled: user.twoFactorEnabled,
+},
     });
   } catch (err) {
     console.log(err);
@@ -272,7 +273,7 @@ export async function refreshHandler(req: Request, res: Response) {
 
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
-      secure: isProd,
+      secure: true,
       sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -300,7 +301,11 @@ export async function refreshHandler(req: Request, res: Response) {
 }
 
 export async function logoutHandler(_req: Request, res: Response) {
-  res.clearCookie("refreshToken", { path: "/" });
+  res.clearCookie("refreshToken", { 
+  path: "/",
+  secure: true,
+  sameSite: "none",
+});
 
   return res.status(200).json({
     message: "Logged out",
@@ -496,7 +501,7 @@ export async function googleAuthCallbackHandler(req: Request, res: Response) {
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: isProd,
+      secure: true,
       sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -621,14 +626,12 @@ console.log("2FA Enabled before verification:", user?.twoFactorEnabled);
       });
     }
 
-const result = await verify({
+const isValid = verify({
   token: String(code),
   secret: user.twoFactorSecret,
 });
 
-console.log("Verification Result:", result);
-
-if (!result.valid) {
+if (!isValid) {
   return res.status(400).json({
     message: "Invalid two factor code",
   });

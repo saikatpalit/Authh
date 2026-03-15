@@ -88,7 +88,7 @@ const Dashboard = () => {
               {t}
             </button>
           ))}
-        </div>
+        </div> 
 
         {/* ── Profile Tab ── */}
         {tab === "profile" && (
