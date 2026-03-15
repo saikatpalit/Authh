@@ -458,8 +458,9 @@ export async function googleAuthCallbackHandler(req: Request, res: Response) {
 
     const payload = ticket.getPayload();
 
-    const email = payload?.email;
-    const emailVerified = payload?.email_verified;
+const email = payload?.email;
+const emailVerified = payload?.email_verified;
+const googleName = payload?.name || payload?.given_name || "";
 
     if (!email || !emailVerified) {
       return res.status(400).json({
@@ -475,14 +476,16 @@ export async function googleAuthCallbackHandler(req: Request, res: Response) {
       const randomPassword = crypto.randomBytes(16).toString("hex");
       const passwordHash = await hashPassword(randomPassword);
 
-      user = await User.create({
-        email: normalizedEmail,
-        passwordHash,
-        role: "user",
-        isEmailVerified: true,
-        twoFactorEnabled: false,
-      });
+user = await User.create({
+  email: normalizedEmail,
+  passwordHash,
+  name: googleName,        // ← add this
+  role: "user",
+  isEmailVerified: true,
+  twoFactorEnabled: false,
+});
     } else {
+      if (!user.name && googleName) user.name = googleName; 
       if (!user.isEmailVerified) {
         user.isEmailVerified = true;
         await user.save();
