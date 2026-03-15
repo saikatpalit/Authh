@@ -484,13 +484,27 @@ user = await User.create({
   isEmailVerified: true,
   twoFactorEnabled: false,
 });
+    // } else {
+    //   if (!user.name && googleName) user.name = googleName; 
+    //   if (!user.isEmailVerified) {
+    //     user.isEmailVerified = true;
+    //     await user.save();
+    //   }
+    // }
     } else {
-      if (!user.name && googleName) user.name = googleName; 
-      if (!user.isEmailVerified) {
-        user.isEmailVerified = true;
-        await user.save();
-      }
-    }
+  let needsSave = false;
+
+  if (!user.name && googleName) {
+    user.name = googleName;
+    needsSave = true;
+  }
+  if (!user.isEmailVerified) {
+    user.isEmailVerified = true;
+    needsSave = true;
+  }
+
+  if (needsSave) await user.save(); // ✅ saves whenever anything changed
+}
 
     const accessToken = createAccessToken(
       user.id,
