@@ -13,7 +13,7 @@ import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
 import { generateSecret, generateURI, verify } from "otplib";
 
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID); // ADD
+// const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID); // ADD
 
 function getAppUrl() {
   return process.env.APP_URL || `http://localhost:${process.env.PORT}`;
@@ -413,210 +413,210 @@ export async function resetPasswordHandler(req: Request, res: Response) {
   }
 }
 
-// export async function googleAuthStartHandler(_req: Request, res: Response) {
-//   try {
-//     const client = getGoogleClient();
-
-//     const url = client.generateAuthUrl({
-//       access_type: "offline",
-//       prompt: "consent",
-//       scope: ["openid", "email", "profile"],
-//     });
-
-//     return res.redirect(url);
-//   } catch (err) {
-//     console.log(err);
-//     return res.status(500).json({
-//       message: "Internal server error",
-//     });
-//   }
-// }
-
-// export async function googleAuthCallbackHandler(req: Request, res: Response) {
-//   const code = req.query.code as string | undefined;
-
-//   if (!code) {
-//     return res.status(400).json({
-//       message: "Missing code in callback",
-//     });
-//   }
-
-//   try {
-//     const client = getGoogleClient();
-
-//     const { tokens } = await client.getToken(code);
-
-//     if (!tokens.id_token) {
-//       return res.status(400).json({
-//         message: "No googles id_token is present",
-//       });
-//     }
-
-//     //verify id tokena and read the user info from it
-//     const ticket = await client.verifyIdToken({
-//       idToken: tokens.id_token,
-//       audience: process.env.GOOGLE_CLIENT_ID as string,
-//     });
-
-//     const payload = ticket.getPayload();
-
-// const email = payload?.email;
-// const emailVerified = payload?.email_verified;
-// const googleName = payload?.name || payload?.given_name || "";
-
-//     if (!email || !emailVerified) {
-//       return res.status(400).json({
-//         message: "Google email account is not verified",
-//       });
-//     }
-
-//     const normalizedEmail = email.toLowerCase().trim();
-
-//     let user = await User.findOne({ email: normalizedEmail });
-
-//     if (!user) {
-//       const randomPassword = crypto.randomBytes(16).toString("hex");
-//       const passwordHash = await hashPassword(randomPassword);
-
-// user = await User.create({
-//   email: normalizedEmail,
-//   passwordHash,
-//   name: googleName,        // ← add this
-//   role: "user",
-//   isEmailVerified: true,
-//   twoFactorEnabled: false,
-// });
-//     // } else {
-//     //   if (!user.name && googleName) user.name = googleName; 
-//     //   if (!user.isEmailVerified) {
-//     //     user.isEmailVerified = true;
-//     //     await user.save();
-//     //   }
-//     // }
-//     } else {
-//   let needsSave = false;
-
-//   if (!user.name && googleName) {
-//     user.name = googleName;
-//     needsSave = true;
-//   }
-//   if (!user.isEmailVerified) {
-//     user.isEmailVerified = true;
-//     needsSave = true;
-//   }
-
-//   if (needsSave) await user.save(); // ✅ saves whenever anything changed
-// }
-
-//     const accessToken = createAccessToken(
-//       user.id,
-//       user.role as "user" | "admin",
-//       user.tokenVersion
-//     );
-
-//     const refreshToken = createRefreshToken(user.id, user.tokenVersion);
-
-//     const isProd = process.env.NODE_ENV === "production";
-
-//     res.cookie("refreshToken", refreshToken, {
-//       httpOnly: true,
-//       secure: true,
-//       sameSite: "none",
-//       maxAge: 7 * 24 * 60 * 60 * 1000,
-//     });
-
-//     // return res.json({
-//     //   message: "Google login successfully",
-//     //   accessToken,
-//     //   user: {
-//     //     id: user.id,
-//     //     email: user.email,
-//     //     role: user.role,
-//     //     isEmailVerified: user.isEmailVerified,
-//     //   },
-//     // });
-
-//     const redirectParams = new URLSearchParams({
-//   accessToken,
-//   id: user.id,
-//   email: user.email,
-//   role: user.role,
-//   name: user.name || "",
-//   isEmailVerified: String(user.isEmailVerified),
-// });
-
-// return res.redirect(`${getFrontendUrl()}/google-callback?${redirectParams.toString()}`);
-//   } catch (err) {
-//     console.log(err);
-//     return res.status(500).json({
-//       message: "Internal server error",
-//     });
-//   }
-// }
-
-export const googleLoginHandler = async (req: Request, res: Response) => {
+export async function googleAuthStartHandler(_req: Request, res: Response) {
   try {
-    const { token } = req.body;
+    const client = getGoogleClient();
 
-    if (!token) {
-      return res.status(400).json({ message: "Token is required" });
-    }
-
-    // Verify the Google token
-    const ticket = await googleClient.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
+    const url = client.generateAuthUrl({
+      access_type: "offline",
+      prompt: "consent",
+      scope: ["openid", "email", "profile"],
     });
 
-    const payload = ticket.getPayload();
-    if (!payload?.email) {
-      return res.status(400).json({ message: "Invalid Google token" });
-    }
+    return res.redirect(url);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+}
 
-    const { email, name } = payload;
+export async function googleAuthCallbackHandler(req: Request, res: Response) {
+  const code = req.query.code as string | undefined;
 
-    // Find or create user
-    let user = await User.findOne({ email });
+  if (!code) {
+    return res.status(400).json({
+      message: "Missing code in callback",
+    });
+  }
 
-    if (!user) {
-      user = await User.create({
-        email,
-        name,
-        passwordHash: "google-oauth",   // no password for Google users
-        isEmailVerified: true,           // Google already verified the email
-        role: "user",
+  try {
+    const client = getGoogleClient();
+
+    const { tokens } = await client.getToken(code);
+
+    if (!tokens.id_token) {
+      return res.status(400).json({
+        message: "No googles id_token is present",
       });
     }
 
-    // Issue your own tokens (same as normal login)
-    const accessToken = createAccessToken(user.id, user.role, user.tokenVersion);
+    //verify id tokena and read the user info from it
+    const ticket = await client.verifyIdToken({
+      idToken: tokens.id_token,
+      audience: process.env.GOOGLE_CLIENT_ID as string,
+    });
+
+    const payload = ticket.getPayload();
+
+const email = payload?.email;
+const emailVerified = payload?.email_verified;
+const googleName = payload?.name || payload?.given_name || "";
+
+    if (!email || !emailVerified) {
+      return res.status(400).json({
+        message: "Google email account is not verified",
+      });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    let user = await User.findOne({ email: normalizedEmail });
+
+    if (!user) {
+      const randomPassword = crypto.randomBytes(16).toString("hex");
+      const passwordHash = await hashPassword(randomPassword);
+
+user = await User.create({
+  email: normalizedEmail,
+  passwordHash,
+  name: googleName,        // ← add this
+  role: "user",
+  isEmailVerified: true,
+  twoFactorEnabled: false,
+});
+    // } else {
+    //   if (!user.name && googleName) user.name = googleName; 
+    //   if (!user.isEmailVerified) {
+    //     user.isEmailVerified = true;
+    //     await user.save();
+    //   }
+    // }
+    } else {
+  let needsSave = false;
+
+  if (!user.name && googleName) {
+    user.name = googleName;
+    needsSave = true;
+  }
+  if (!user.isEmailVerified) {
+    user.isEmailVerified = true;
+    needsSave = true;
+  }
+
+  if (needsSave) await user.save(); // ✅ saves whenever anything changed
+}
+
+    const accessToken = createAccessToken(
+      user.id,
+      user.role as "user" | "admin",
+      user.tokenVersion
+    );
+
     const refreshToken = createRefreshToken(user.id, user.tokenVersion);
 
-    // Set refresh token as httpOnly cookie (same as normal login)
+    const isProd = process.env.NODE_ENV === "production";
+
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    return res.json({
-      accessToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        isEmailVerified: user.isEmailVerified,
-        twoFactorEnabled: user.twoFactorEnabled,
-      },
-    });
+    // return res.json({
+    //   message: "Google login successfully",
+    //   accessToken,
+    //   user: {
+    //     id: user.id,
+    //     email: user.email,
+    //     role: user.role,
+    //     isEmailVerified: user.isEmailVerified,
+    //   },
+    // });
 
+    const redirectParams = new URLSearchParams({
+  accessToken,
+  id: user.id,
+  email: user.email,
+  role: user.role,
+  name: user.name || "",
+  isEmailVerified: String(user.isEmailVerified),
+});
+
+return res.redirect(`${getFrontendUrl()}/google-callback?${redirectParams.toString()}`);
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Google login failed" });
+    console.log(err);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
-};
+}
+
+// export const googleLoginHandler = async (req: Request, res: Response) => {
+//   try {
+//     const { token } = req.body;
+
+//     if (!token) {
+//       return res.status(400).json({ message: "Token is required" });
+//     }
+
+//     // Verify the Google token
+//     const ticket = await googleClient.verifyIdToken({
+//       idToken: token,
+//       audience: process.env.GOOGLE_CLIENT_ID,
+//     });
+
+//     const payload = ticket.getPayload();
+//     if (!payload?.email) {
+//       return res.status(400).json({ message: "Invalid Google token" });
+//     }
+
+//     const { email, name } = payload;
+
+//     // Find or create user
+//     let user = await User.findOne({ email });
+
+//     if (!user) {
+//       user = await User.create({
+//         email,
+//         name,
+//         passwordHash: "google-oauth",   // no password for Google users
+//         isEmailVerified: true,           // Google already verified the email
+//         role: "user",
+//       });
+//     }
+
+//     // Issue your own tokens (same as normal login)
+//     const accessToken = createAccessToken(user.id, user.role, user.tokenVersion);
+//     const refreshToken = createRefreshToken(user.id, user.tokenVersion);
+
+//     // Set refresh token as httpOnly cookie (same as normal login)
+//     res.cookie("refreshToken", refreshToken, {
+//       httpOnly: true,
+//       secure: process.env.NODE_ENV === "production",
+//       sameSite: "strict",
+//       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+//     });
+
+//     return res.json({
+//       accessToken,
+//       user: {
+//         id: user.id,
+//         email: user.email,
+//         name: user.name,
+//         role: user.role,
+//         isEmailVerified: user.isEmailVerified,
+//         twoFactorEnabled: user.twoFactorEnabled,
+//       },
+//     });
+
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).json({ message: "Google login failed" });
+//   }
+// };
 
 
 
