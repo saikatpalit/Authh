@@ -38,35 +38,39 @@ const GuestRoute = ({ children }) => {
 // ─── Google OAuth callback handler ───────────────────────────────────────────
 // Backend redirects to: /google-callback?accessToken=...&...
 // This component reads the token, saves it in context, then redirects home.
-const GoogleCallback = () => {
-  const { setIsLoggedin, setUserData, accessTokenRef } = useContext(AppContext);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const accessToken = params.get("accessToken");
-    const id = params.get("id");
-    const email = params.get("email");
-    const role = params.get("role");
-    const name = params.get("name");
-    const isEmailVerified = params.get("isEmailVerified") === "true";
 
-    if (accessToken) {
-      accessTokenRef.current = accessToken;
-      setIsLoggedin(true);
-      setUserData({ id, email, role, name, isEmailVerified });
-      navigate(role === "admin" ? "/admin" : "/", { replace: true });
-    } else {
-      navigate("/login?error=google_failed", { replace: true });
-    }
-  }, []);
+//deleting for google auth 2nd method
 
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-200 to-purple-400">
-      <div className="text-white text-lg">Signing you in...</div>
-    </div>
-  );
-};
+// const GoogleCallback = () => {
+//   const { setIsLoggedin, setUserData, accessTokenRef } = useContext(AppContext);
+//   const navigate = useNavigate();
+
+//   useEffect(() => {
+//     const params = new URLSearchParams(window.location.search);
+//     const accessToken = params.get("accessToken");
+//     const id = params.get("id");
+//     const email = params.get("email");
+//     const role = params.get("role");
+//     const name = params.get("name");
+//     const isEmailVerified = params.get("isEmailVerified") === "true";
+
+//     if (accessToken) {
+//       accessTokenRef.current = accessToken;
+//       setIsLoggedin(true);
+//       setUserData({ id, email, role, name, isEmailVerified });
+//       navigate(role === "admin" ? "/admin" : "/", { replace: true });
+//     } else {
+//       navigate("/login?error=google_failed", { replace: true });
+//     }
+//   }, []);
+
+//   return (
+//     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-200 to-purple-400">
+//       <div className="text-white text-lg">Signing you in...</div>
+//     </div>
+//   );
+// };
 
 const App = () => {
   return (
@@ -77,7 +81,7 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/email-verify" element={<EmailVerify />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/google-callback" element={<GoogleCallback />} />
+        {/* <Route path="/google-callback" element={<GoogleCallback />} /> */}
 
         {/* Guest only */}
         <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
