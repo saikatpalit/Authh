@@ -18,7 +18,7 @@ import requireAuth from "../middleware/requireAuth";
 
 
 
-// Login — 5 attempts per 15 min
+// Login — 3 attempts per 15 min
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 3,
